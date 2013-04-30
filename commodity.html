@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Товарная статистика</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+    <link href="assets/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/ico/apple-touch-icon-114-precomposed.png">
+      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/ico/apple-touch-icon-72-precomposed.png">
+                    <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png">
+                                   <link rel="shortcut icon" href="assets/ico/favicon.png">
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">Trading-Stat.ru</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li><a href="index.html">Главная</a></li>
+              <li class="divider-vertical" ></li>
+              <li class="active"><a href="charts.html">Графики</a></li>
+              <li><a href="#about">Сезонность</a></li>
+              <li><a href="spreads.html">Спреды</a></li>
+              <li class="divider-vertical" ></li>
+              <li><a href="#contact">Контакты</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+
+<div class="container-fluid"> <!--  -->
+
+	<div class="row-fluid">
+
+		<div class="span2"> <!-- показатели др. параметры -->
+
+			<form>
+				<fieldset>
+					<legend>Показатели</legend>
+					<div data-bind="foreach: commodityAttrs">
+						<label class="checkbox"><input data-bind="checked: isChecked, click: $parent.attrClick" type="checkbox"><span data-bind="text: name"></span></label>
+					</div>
+
+					<br/>
+					<label>Страны</label>
+					<select data-bind="options: availableCountries, optionsText: 'name', value: selectedCountry1, optionsCaption: 'Choose...'"></select>
+					<select data-bind="options: availableCountries, optionsText: 'name', value: selectedCountry2, optionsCaption: 'Choose...'"></select>
+					<select data-bind="options: availableCountries, optionsText: 'name', value: selectedCountry3, optionsCaption: 'Choose...'"></select>
+					<select data-bind="options: availableCountries, optionsText: 'name', value: selectedCountry4, optionsCaption: 'Choose...'"></select>
+					<select data-bind="options: availableCountries, optionsText: 'name', value: selectedCountry5, optionsCaption: 'Choose...'"></select>
+				</fieldset>
+			</form>
+
+
+
+		</div>
+
+
+		<div class="span10">
+			<button data-bind="click: refreshChart" class="btn" type="button">Обновить график</button>
+
+
+			<div data-bind="html: testTablesHTML" id="test_div"></div>
+
+			<div id="chartdiv" style="width:100%; height:600px;"></div>
+		</div>
+
+	</div>
+
+</div>
+
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="assets/js/jquery.js"></script>
+    <script src="assets/js/bootstrap-dropdown.js"></script>
+<!--<script src="assets/js/bootstrap-transition.js"></script>
+    <script src="assets/js/bootstrap-alert.js"></script>
+    <script src="assets/js/bootstrap-modal.js"></script>
+    <script src="assets/js/bootstrap-scrollspy.js"></script>
+    <script src="assets/js/bootstrap-tab.js"></script>
+    <script src="assets/js/bootstrap-tooltip.js"></script>
+    <script src="assets/js/bootstrap-popover.js"></script>
+    <script src="assets/js/bootstrap-button.js"></script>
+    <script src="assets/js/bootstrap-collapse.js"></script>
+    <script src="assets/js/bootstrap-carousel.js"></script>
+    <script src="assets/js/bootstrap-typeahead.js"></script> -->
+
+	<script src="js/knockout/knockout-2.2.1.js" type="text/javascript"></script>
+	<script src="js/chart/amcharts/amstock.js" type="text/javascript"></script>
+
+	<script src="js/ws/svc.js"></script>
+	<script src="js/ws/getcommodityattrs.js"></script>
+	<script src="js/ws/getcommoditycountries.js"></script>
+	<script src="js/ws/getcommoditydata.js"></script>
+
+
+<script type="text/javascript">
+
+function commodityViewModel() {
+	var self = this;
+
+	self.commodityAttrs = ko.observableArray();
+
+	self.availableCountries = ko.observableArray();
+        self.selectedCountry1 = ko.observable();
+        self.selectedCountry2 = ko.observable();
+        self.selectedCountry3 = ko.observable();
+        self.selectedCountry4 = ko.observable();
+        self.selectedCountry5 = ko.observable();
+	
+	self.testTablesHTML = ko.observable();
+
+	self.refreshChart = function() {
+		var html = "";
+
+		var generateTableHTMLFromCommodityData = function(request, result) {
+			var table_html = '<table class="table table-hover"><caption>' + request.countries[request.country_idx].name + '</caption><thead><tr><th>Year</th>';
+			var attrs = self.commodityAttrs();
+			for (var j=0; j < attrs.length; j++) {
+				if (attrs[j].isChecked()) {
+					table_html = table_html + '<th>' + attrs[j].name + '</th>';
+				}
+			}
+			table_html = table_html + '</tr></thead><tbody>';
+
+			var data = result.data;
+			for (var i=0; i < data.length; i++) {
+				table_html = table_html + '<tr><td>' + data[i].year + '</td>';
+
+				for (var j=0; j < attrs.length; j++) {
+					if (attrs[j].isChecked()) {
+						table_html = table_html  + '<td>' + data[i][attrs[j].attr] + '</td>';
+					}
+				}
+
+				table_html = table_html + '</tr>';
+			}
+			table_html = table_html + '</tbody></table>';
+
+			html = html + table_html;
+
+
+			request.country_idx++;
+			if (request.country_idx < request.countries.length) {
+				request.country_code = request.countries[request.country_idx].code;
+				GetCommodityData(
+					request, 
+					generateTableHTMLFromCommodityData,
+					function() {} );
+			}
+
+// vvb
+var chartData = [];
+var attrs     = self.commodityAttrs();
+ 
+for (var n=0;n<result.data.length;n++ )
+{
+  var newDate = new Date(result.data[n].year, 1, 1);
+  var dataElement = new Object;
+  dataElement.year = newDate;
+  for (var j=0; j<attrs.length;j++)
+  {
+      var attr  = attrs[j].attr;
+      var value = result.data[n][attrs[j].attr];
+      var attrname = "value"+attr;
+      dataElement[attrname]=value;
+  }
+  chartData[n] = dataElement;
+}
+ 
+var chart = new AmCharts.AmStockChart();
+//var stockPanel = new AmCharts.StockPanel();
+ 
+var curStockPanelObj 	 = new Object;
+var visibleStockPanelObj = new Object;
+ 
+var stockPanels = [];
+for (var j=0;j<attrs.length;j++)
+{
+//  alert(attrs[j].unit);
+	var curPanel = curStockPanelObj[attrs[j].unit];
+	if ( ( curPanel == undefined) ) // Панелька эвэл
+	{
+		var curStockPanel = new AmCharts.StockPanel();
+		var stockLegend = new AmCharts.StockLegend();
+		stockLegend.valueTextRegular = undefined;
+		curStockPanel.stockLegend = stockLegend;
+
+		if ( ( attrs[j].isChecked() ) ){
+		  visibleStockPanelObj[attrs[j].unit] = curStockPanel;
+		  stockPanels.push(curStockPanel);
+		}
+
+		curStockPanelObj[attrs[j].unit] = curStockPanel;
+ 	}
+	else
+	{
+		if ( ( attrs[j].isChecked() ) ){
+		    if (visibleStockPanelObj[attrs[j].unit] == undefined )
+		    {
+			visibleStockPanelObj[attrs[j].unit] = curPanel;
+			stockPanels.push(curPanel);
+		    }
+		}
+	}
+
+}
+ 
+var dataSet = new AmCharts.DataSet();
+dataSet.fieldMappings = [];
+for (var j=0; j<attrs.length;j++){
+  var attr = attrs[j].attr;
+  var attrname = "value"+attr;
+  dataSet.fieldMappings[j] = 
+  {
+    fromField: attrname,
+    toField: attrname
+  };
+}
+ 
+dataSet.color = "#7f8da9";
+dataSet.dataProvider = chartData;
+dataSet.title = "";
+dataSet.categoryField = "year";
+ 
+chart.dataSets = [dataSet];
+chart.panels = stockPanels;
+ 
+for (var j=0; j<attrs.length;j++){
+  	var graph = new AmCharts.StockGraph();
+  	attr = attrs[j];
+  	graph.type = "line";
+  	graph.title = attr.name;
+  	graph.valueField = "value"+attr.attr;
+  	graph.useDataSetColors = false;
+  	graph.showBalloon = true;
+  	curStockPanelObj[attrs[j].unit].addStockGraph(graph);
+	if (  !(self.commodityAttrs()[j].isChecked()  ) )
+	{
+	    curStockPanelObj[attrs[j].unit].hideGraph(graph);
+
+	}
+}
+ 
+chartDiv = document.getElementById('chartdiv');
+chartHeight = chart.panels.length * 250;
+chartDiv.style.height = "" + chartHeight + "px";
+chart.write('chartdiv');
+ 
+// end vvb	
+		};
+
+
+		var countries = [];
+		for (var country_idx = 1; country_idx <= 5; country_idx++) {
+			var country = self["selectedCountry" + country_idx]();
+			if (country != undefined)
+				countries.push(country);
+		}
+
+		if (countries.length > 0) {
+			GetCommodityData(
+				{ commodity_id: 2631000, country_code: countries[0].code, countries: countries, country_idx: 0 }, 
+				generateTableHTMLFromCommodityData,
+				function() {} );
+		}
+
+
+
+		self.testTablesHTML(html);
+	};
+
+	
+	self.attrClick = function() {
+		self.refreshChart();
+		return true;
+	}
+
+	self.countrySelect = function() {
+		self.refreshChart();
+		return true;
+	}
+
+	self.selectedCountry1.subscribe(self.countrySelect);
+	self.selectedCountry2.subscribe(self.countrySelect);
+	self.selectedCountry3.subscribe(self.countrySelect);
+	self.selectedCountry4.subscribe(self.countrySelect);
+	self.selectedCountry5.subscribe(self.countrySelect);
+
+	// commodityAttrs initialization
+	GetCommodityAttrs(
+		{ commodity_id: 2631000 }, 
+		function(request, result) {
+			var attrs = result.attrs;
+			for (var i=0; i < attrs.length; i++)
+			{
+				attrs[i].isChecked = ko.observable(attrs[i].default);
+			}
+			self.commodityAttrs(attrs);
+		},
+		function() {
+		});
+
+	// availableCountries initialization
+	GetCommodityCountries(
+		{ commodity_id: 2631000 }, 
+		function(request, result) {
+			var countries = result.countries;
+			self.availableCountries(countries);
+			self.selectedCountry1(countries[0]);
+		},
+		function() {
+		});
+
+}; 
+
+
+
+ko.applyBindings(new commodityViewModel());
+
+</script>
+
+</body>
+</html>

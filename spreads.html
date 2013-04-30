@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Анализ спредов</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+    <link href="assets/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/ico/apple-touch-icon-114-precomposed.png">
+      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/ico/apple-touch-icon-72-precomposed.png">
+                    <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png">
+                                   <link rel="shortcut icon" href="assets/ico/favicon.png">
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">Trading-Stat.ru</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li><a href="index.html">Главная</a></li>
+              <li class="divider-vertical" ></li>
+              <li><a href="charts.html">Графики</a></li>
+              <li><a href="#about">Сезонность</a></li>
+              <li class="active"><a href="spreads.html">Спреды</a></li>
+              <li class="divider-vertical" ></li>
+              <li><a href="#contact">Контакты</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+	<form id="formSymbol" class="form-inline">
+    <!--<legend>Контракты</legend>  -->
+   	<div id="SymbolArea" class="control-group">
+	<div class="controls">
+		<!-- <span class="help-inline">Контракты: </span> -->
+    	<input id="inputSymbol1" class="input-small" type="text" placeholder="Cимвол…" value="LEG13">
+		<span class="help-inline">,&nbsp;</span>
+		<input id="inputSymbol2" class="input-small" type="text" placeholder="Cимвол…" value="LEJ13">
+		<button id="btn_analyse_spread" class="btn" type="button">Анализ спреда</button>
+		<span id="SymbolAreaInlineHelp" class="help-inline">Пример: LEG12, LEZ12</span>
+	</div>
+    </div>
+	</form>
+
+
+    <div id="divServiceContent" class="hidden">
+
+    <ul class="nav nav-pills">
+        <li id="Settings" class="active">
+            <a href="#">Settings</a>
+        </li>
+
+        <li id="liResultsNavSummaryDisabled" class="disabled"><a href="#">Summary</a></li>
+        <li id="liResultsNavDetailsDisabled" class="disabled"><a href="#">Details</a></li>
+        <li id="liResultsNavAllChartsDisabled" class="disabled"><a href="#">All charts</a></li>
+
+        <li id="Summary" class="hidden"><a href="#">Summary</a></li>
+        <li id="liResultsNavDetails" class="hidden dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Details <b class="caret"></b></a>
+            <ul id="ulDetailsDropdown" class="dropdown-menu">
+            </ul>
+        </li>
+        <li id="liResultsNavAllCharts" class="hidden"><a href="#">All charts</a></li>
+
+
+    </ul>
+
+    <div id="panelSettings">
+
+   	<form id="formSettingsMult" class="form-inline hidden">
+    <legend id="formMultLegend">Множители</legend>
+    <!--<legend id="formMultLegend">Множители</legend> -->
+    <div id="Mult" class="control-group">
+    <div class="controls">
+    	<input id="inputMultiplier1" class="input-small" type="text" placeholder="Множитель…" value="1">
+		<span class="help-inline">,&nbsp;</span>
+    	<input id="inputMultiplier2" class="input-small" type="text" placeholder="Множитель…" value="1">
+		<span id="MultiplierInlineHelp" class="help-inline">&nbsp;</span>
+	</div>
+    </div>
+    </form>
+
+   	<form class="form-inline">
+    <legend id="Legend1">Cтатистика по спредам</legend>
+    <!--<legend id="Legend1">Также вывести статистику по</legend> -->
+    <div id="divSettingsContracts" class="control-group">
+    </div>
+	<button id="btn_refresh_charts" class="btn" type="button">Обновить графики</button>
+    </form>
+
+    </div> <!-- panelSettings -->
+
+    <div id="panelSummary" class="hidden">
+        <div class="row-fluid">
+            <div id="chartdivSummary" class="span8" style="height:600px;"><p style="text-align:center; vertical-align:middle">Seasonal chart</p></div>
+            <div id="hstchartdivSummary" class="span4" style="height:600px;"></div>
+        </div>
+        <hr class="soften">
+    </div>
+
+	<div id="chartsdiv" style="width:100%;"></div>
+
+    <!-- <div id="divNavBottom" class="pagination pagination-centered">
+      <ul>
+        <li class="active"><a href="#">Summary</a></li>
+        <li><a href="#">1</a></li>
+        <li><a href="#">2</a></li>
+        <li><a href="#">3</a></li>
+        <li><a href="#">4</a></li>
+        <li><a href="#">5</a></li>
+        <li><a href="#">6</a></li>
+        <li><a href="#">7</a></li>
+      </ul>
+    </div>-->
+
+    </div> <!-- divServiceContent -->
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="assets/js/jquery.js"></script>
+    <script src="assets/js/bootstrap-dropdown.js"></script>
+<!--<script src="assets/js/bootstrap-transition.js"></script>
+    <script src="assets/js/bootstrap-alert.js"></script>
+    <script src="assets/js/bootstrap-modal.js"></script>
+    <script src="assets/js/bootstrap-scrollspy.js"></script>
+    <script src="assets/js/bootstrap-tab.js"></script>
+    <script src="assets/js/bootstrap-tooltip.js"></script>
+    <script src="assets/js/bootstrap-popover.js"></script>
+    <script src="assets/js/bootstrap-button.js"></script>
+    <script src="assets/js/bootstrap-collapse.js"></script>
+    <script src="assets/js/bootstrap-carousel.js"></script>
+    <script src="assets/js/bootstrap-typeahead.js"></script> -->
+    <script src="js/svc.js"></script>
+    <script src="js/getquotes.js"></script>
+    <script src="js/getsymbolinfo.js"></script>
+    <script src="js/getcontractinfos.js"></script>
+    <script src="js/getspreadquotes.js"></script>
+
+    <script src="js/chart/amcharts/amstock.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+var info1;
+var info2;
+var infos1;
+var infos2;
+var infos12;
+
+var detail_infos12;
+var summary_info = {};
+
+var last_year1;
+var last_year2;
+var years_num;
+
+var max_spread_value;
+var min_spread_value;
+
+var zooming_all_charts;
+
+$(function () {
+    $("#btn_analyse_spread").click(AnalyseSpread_click);
+    $("#formSymbol").submit(AnalyseSpread_click);
+	$("#btn_refresh_charts").click(RefreshAnalysis_click);
+
+	$("#Settings").click(navService_click);
+	$("#Summary").click(navService_click);
+	$("#liResultsNavAllCharts").click(navService_click);
+});
+
+function navService_click() {
+    var id = $(this).attr("id");
+    if (id == "liResultsNavAllCharts") {
+        SetActiveNavPill(id);
+
+        $("#panelSettings").addClass("hidden");
+        $("#panelSummary").removeClass("hidden");
+        $("#chartsdiv").find(".chartpanel").removeClass("hidden");
+
+        for (var i = 0; i < years_num; i++) {
+            if (infos12[i].nav_idx != undefined) {
+                ShowPanel('Details' + infos12[i].nav_idx);
+            }
+        }
+    }
+    else {
+        NavigateService(id);
+    }
+}
+
+function NavigateService(id) {
+    SetActiveNavPill(id);
+
+    HideAllPanels();
+    ShowPanel(id);
+}
+
+function HideAllPanels() {
+    $("#panelSettings").addClass("hidden");
+    $("#panelSummary").addClass("hidden");
+    $("#chartsdiv").find(".chartpanel").addClass("hidden");
+}
+
+function ShowPanel(id) {
+    $("#panel" + id).removeClass("hidden");
+
+    if (id == "Summary") {
+        if (summary_info != undefined
+            && summary_info.hstgrm != undefined 
+            && summary_info.hstgrm_chart == undefined) {
+            summary_info.hstgrm_chart = createHstgrmChart('Summary spread value histogram', 'hstchartdivSummary', summary_info.hstgrm);
+        }
+    }
+    else if (detail_infos12 != undefined) {
+        var info12 = detail_infos12[id];
+        if (info12 != undefined) {
+            if (info12.chart == undefined) {
+                info12.chart = createSpreadChart(info12);
+                info12.hstgrm_chart = createHstgrmChart(info12.info1.Name + ' / ' + info12.info2.Name + ' spread value histogram', 'hstchartdiv' + info12.nav_idx, info12.hstgrm);
+            }
+        }
+    }
+}
+
+function SetActiveNavPill(id) {
+    $("#Settings").removeClass("active");
+    $("#Summary").removeClass("active");
+    $("#ulDetailsDropdown").find("li").removeClass("active");
+    $("#liResultsNavAllCharts").removeClass("active");
+
+    $("#" + id).addClass("active");
+}
+
+function SetServiceContentVisibility(visibility) {
+    if (visibility == true) {
+        $("#divServiceContent").removeClass("hidden");
+    }
+    else {
+        $("#divServiceContent").addClass("hidden");
+    }
+}
+
+function SetResultsPagesVisibility(visibility) {
+    if (visibility == true) {
+        $("#liResultsNavSummaryDisabled").addClass("hidden");
+        $("#liResultsNavDetailsDisabled").addClass("hidden");
+        $("#liResultsNavAllChartsDisabled").addClass("hidden");
+        $("#Summary").removeClass("hidden");
+        $("#liResultsNavDetails").removeClass("hidden");
+        $("#liResultsNavAllCharts").removeClass("hidden");
+    }
+    else {
+        $("#liResultsNavSummaryDisabled").removeClass("hidden");
+        $("#liResultsNavDetailsDisabled").removeClass("hidden");
+        $("#liResultsNavAllChartsDisabled").removeClass("hidden");
+        $("#Summary").addClass("hidden");
+        $("#liResultsNavDetails").addClass("hidden");
+        $("#liResultsNavAllCharts").addClass("hidden");
+    }
+}
+
+
+
+function AnalyseSpread_click() {
+	var smb1 = $("#inputSymbol1").val();
+	if (smb1=='')
+		return false;
+
+	var smb2 = $("#inputSymbol2").val();
+	if (smb2 == '')
+		return false;
+
+	SetServiceContentVisibility(false);
+    SetResultsPagesVisibility(false);
+
+	GetSymbolInfo(
+		smb1,
+        Symbol1_Complete,
+		function (xmlHttpRequest, status, errorThrown) {
+			alert(xmlHttpRequest.responseText);
+		}
+	);
+		
+	return false;
+}
+
+function Symbol1_Complete(smb, smb_info) {
+    if (smb_info == undefined) {
+        $("#SymbolArea").addClass("error");
+        $("#SymbolAreaInlineHelp").text("Can't find '" + smb + "' symbol!");
+    }
+    else {
+        $("#SymbolArea").removeClass("error");
+
+        info1 = smb_info;
+
+        $("#inputSymbol1").val(info1.Symbol);
+
+        var smb2 = $("#inputSymbol2").val();
+        GetSymbolInfo(
+			smb2,
+            Symbol2_Complete,
+			function (xmlHttpRequest, status, errorThrown) {
+				alert(xmlHttpRequest.responseText);
+			}
+		);
+    }
+}
+
+function Symbol2_Complete(smb, smb_info) {
+    if (smb_info == undefined) {
+		$("#SymbolArea").addClass("error");
+		$("#SymbolAreaInlineHelp").text("Can't find '" + smb + "' symbol!");
+	}
+	else {
+		$("#SymbolArea").removeClass("error");
+
+		info2 = smb_info;
+
+		$("#inputSymbol2").val(info2.Symbol);
+
+		$("#SymbolAreaInlineHelp").text(info1.Name + ', ' + info2.Name);
+
+		if (info1.BaseSymbol == info2.BaseSymbol) {
+			$("#formSettingsMult").addClass("hidden");
+		} else {
+            $("#formSettingsMult").removeClass("hidden");
+
+			$("#formMultLegend").text("Multipliers for " + info1.Name + " and " + info2.Name);
+		}
+
+		GetContractInfos(
+            {
+                base_smb: info1.BaseSymbol,
+                cnt_m: info1.ContractMonth,
+                cnt_y: undefined
+            },
+            Infos1Complate,
+	    	function (xmlHttpRequest, status, errorThrown) {
+		    	alert(xmlHttpRequest.responseText);
+			}
+        );
+	}
+}
+
+function Infos1Complate(request_data, infos) {
+    if (infos == undefined) {
+    	console.log("No data");
+    }
+    else {
+        infos1 = infos;
+
+    	GetContractInfos(
+            {
+                base_smb: info2.BaseSymbol,
+                cnt_m: info2.ContractMonth,
+                cnt_y: undefined
+            },
+            Infos2Complate,
+    		function (xmlHttpRequest, status, errorThrown) {
+	    		alert(xmlHttpRequest.responseText);
+		    }
+        );
+    }
+}
+
+function Infos2Complate(request_data, infos) {
+    if (infos == undefined) {
+    	console.log("No data");
+    }
+    else {
+        infos2 = infos;
+
+    	infos12 = new Array();
+    	infos12[0] = ({info1: info1, info2: info2});
+
+    	last_year1 = info1.ContractYear;
+    	last_year2 = info2.ContractYear;
+        years_num = 1;
+
+        var cnts_selector_code = '';
+
+
+        var stop_cond = false;
+        while (!stop_cond) {
+            var cur_year = last_year1 - years_num;
+            var cnt_info1 = FindCntInfoByYear(infos1, cur_year);
+            if (cnt_info1 == undefined) {
+                stop_cond = true;
+            }
+            else {
+                cur_year = last_year2 - years_num;
+                var cnt_info2 = FindCntInfoByYear(infos2, cur_year);
+                if (cnt_info2 == undefined) {
+                    stop_cond = true;
+                }
+                else {
+                    cnts_selector_code +=
+                    '<div class="controls">  \
+                    <label class="checkbox">  \
+                    <input id="inputYear' + years_num + '" type="checkbox" checked> ' + cnt_info1.Name + ' / ' + cnt_info2.Name + '  \
+                    </label> \
+		            <span class="help-inline">&nbsp;</span> \
+	                </div>';
+
+                    infos12[years_num] = ({ info1: cnt_info1, info2: cnt_info2 });
+
+                    years_num++;
+                }
+            }
+        }
+
+        if (years_num > 1) {
+            $("#divSettingsContracts").html(cnts_selector_code);
+
+            SetServiceContentVisibility(true);
+            NavigateService("Settings");
+        }
+    }
+}
+
+function FindCntInfoByYear(infos, cur_year) {
+    for (var i = 0; i < infos.length; i++) {
+        if (infos[i].ContractYear == cur_year)
+            return infos[i];
+    }
+
+    return undefined;
+}
+
+
+function RefreshAnalysis_click() {
+    
+    var charts_div_html = '';
+    var details_ul_html = '';
+    var j = 1;
+    detail_infos12 = {};
+    for (var i = 0; i < years_num; i++) {
+        infos12[i].chart = undefined;
+
+        if (i == 0 || $("#inputYear" + i).attr("checked") == "checked") {
+            infos12[i].selected = true;
+
+            infos12[i].nav_idx = j;
+
+            detail_infos12["Details" + j] = infos12[i];
+
+            charts_div_html +=
+            '<div id="panelDetails' + j + '" class="hidden chartpanel"><div class="row-fluid"><div id="chartdiv' + j + '" class="span8" style="height:600px;"></div><div id="hstchartdiv' + j + '" class="span4" style="height:600px;"></div></div><hr class="soften"></div>'; //<hr class="soften">
+
+            details_ul_html +=
+            '<li id="Details' + j + '" onclick="navService_click.call(this);"><a href="#">[' + j + '] ' + infos12[i].info1.Name + ' / ' + infos12[i].info2.Name + '</a></li>';
+
+            j++;
+        }
+        else {
+            infos12[i].selected = false;
+        }
+    }
+    $("#chartsdiv").html(charts_div_html);
+    $("#ulDetailsDropdown").html(details_ul_html);
+
+    max_spread_value = undefined;
+    min_spread_value = undefined;
+
+    GetSpreadQuotes(
+        infos12[0].info1.Symbol,
+        infos12[0].info2.Symbol,
+        SpreadQuotesComplete,
+    	function (xmlHttpRequest, status, errorThrown) {
+    	    alert(xmlHttpRequest.responseText);
+    	},
+        ({ idx: 0, Name1: infos12[0].info1.Name, Name2: infos12[0].info2.Name })
+    );
+}
+
+function SpreadQuotesComplete(xmlHttpRequest, status) {
+    if (status == "success") {
+        var chartDataQuotes = createSpreadQuotesChartData(xmlHttpRequest.responseXML, 1, 1);
+        var first_date = undefined;
+        var last_date = undefined;
+        for (var i = 0; i < chartDataQuotes.length; i++) {
+            spread_value = (chartDataQuotes[i].close1 * 10000 - chartDataQuotes[i].close2 * 10000) / 10000;
+            chartDataQuotes[i].spread_value = spread_value;
+
+            if (max_spread_value == undefined || spread_value > max_spread_value) {
+                max_spread_value = spread_value;
+            }
+            if (min_spread_value == undefined || spread_value < min_spread_value) {
+                min_spread_value = spread_value;
+            }
+
+            if (first_date == undefined || chartDataQuotes[i].date < first_date) {
+                first_date = chartDataQuotes[i].date;
+            }
+            if (last_date == undefined || chartDataQuotes[i].date > last_date) {
+                last_date = chartDataQuotes[i].date;
+            }
+        }
+        infos12[this.userdata.idx].Quotes = chartDataQuotes;
+        infos12[this.userdata.idx].firstDate = first_date;
+        infos12[this.userdata.idx].lastDate = last_date;
+        infos12[this.userdata.idx].curStartDate = first_date;
+        infos12[this.userdata.idx].curEndDate = last_date;
+
+        var idx = this.userdata.idx + 1;
+        while (idx < years_num && infos12[idx].selected == false) 
+            idx++;
+
+        if (idx < years_num) {
+            GetSpreadQuotes(
+                infos12[idx].info1.Symbol,
+                infos12[idx].info2.Symbol,
+                SpreadQuotesComplete,
+    	        function (xmlHttpRequest, status, errorThrown) {
+    	            alert(xmlHttpRequest.responseText);
+    	        },
+                ({ idx: idx, Name1: infos12[idx].info1.Name, Name2: infos12[idx].info2.Name })
+            );
+        }
+  	   else {
+  	       CalculateHistograms();
+
+  	       SetResultsPagesVisibility(true);
+  	       NavigateService("Summary");
+        }
+    }
+}
+
+
+function CalculateHistograms() {
+    var max_value = Math.max(Math.abs(min_spread_value), Math.abs(max_spread_value));
+    var mult = 1;
+    while (max_value <= 1) {
+        max_value *= 10;
+        mult /= 10;
+    }
+    while (max_value > 10) {
+        max_value /= 10;
+        mult *= 10;
+    }
+
+    var max_scale_value = Math.floor(max_value);
+
+    var step_value = undefined;
+    if (max_value > 5) step_value = 0.5
+    else if (max_value > 2.5) step_value = 0.25
+    else step_value = 0.1;
+
+    var half_num_of_intervals = Math.round(max_scale_value / step_value) + 1;
+    var last_interval_idx = 2*half_num_of_intervals - 1;
+
+    max_scale_value = max_scale_value * mult;
+    step_value = step_value*mult;
+
+    var summary_hstgrm = GetHistogramArr(half_num_of_intervals, step_value, max_scale_value);
+
+    for (var i = 0; i < years_num; i++) {
+        
+        var quotes = infos12[i].Quotes;
+        if (quotes != undefined) {
+
+            var startDate = infos12[i].curStartDate;
+            var endDate = infos12[i].curEndDate;
+
+            var hstgrm = GetHistogramArr(half_num_of_intervals, step_value, max_scale_value);
+
+            for (var j = 0; j < quotes.length; j++) {
+                if (quotes[j].date < startDate || quotes[j].date > endDate)
+                    continue;
+
+                if (quotes[j].spread_value <= -max_scale_value) {
+                    hstgrm[0].freq += 1;
+                }
+                else if (quotes[j].spread_value >= max_scale_value) {
+                    hstgrm[last_interval_idx].freq += 1;
+                }
+                else if (quotes[j].spread_value == 0) {
+                    hstgrm[half_num_of_intervals].freq += 1;
+                    hstgrm[half_num_of_intervals - 1].freq += 1;
+                }
+                else {
+                    var spread_value = quotes[j].spread_value;
+                    var idx = Math.floor(spread_value / step_value);
+                    if (spread_value < 0)
+                        idx--;
+
+                    hstgrm[half_num_of_intervals + idx].freq += 1;
+                }
+            }
+
+            infos12[i].hstgrm = hstgrm;
+
+            for (var j = 0; j < hstgrm.length; j++) {
+                summary_hstgrm[j].freq += hstgrm[j].freq;
+            }
+        }
+
+    }
+
+    summary_info.hstgrm = summary_hstgrm;
+}
+
+function GetHistogramArr(half_num_of_intervals, step_value, max_scale_value) {
+
+    var hstgrm = new Array();
+    hstgrm.length = half_num_of_intervals * 2;
+    for (var j = 0; j < (half_num_of_intervals - 1); j++) {
+        hstgrm[half_num_of_intervals + j] =
+        {
+            interval: '[' + (step_value * j).toString() + '..' + (step_value * (j + 1)).toString() + ')',
+            freq: 0
+        };
+        hstgrm[half_num_of_intervals - j - 1] =
+        {
+            interval: '[' + (step_value * (-j)).toString() + '..' + (step_value * (-j - 1)).toString() + ')',
+            freq: 0
+        };
+    }
+    hstgrm[0] =
+    {
+        interval: '≤ ' + (-max_scale_value).toString(),
+        freq: 0
+    };
+    hstgrm[hstgrm.length-1] =
+    {
+        interval: '≥ ' + max_scale_value.toString(),
+        freq: 0
+    };
+
+    return hstgrm;
+}
+
+
+function createSpreadChart(info12) {
+
+    var chart = new AmCharts.AmStockChart();
+	chart.pathToImages = "js/chart/amcharts/images/";
+
+	// DATASET //////////////////////////////////////////
+	var dataSet = new AmCharts.DataSet();
+	dataSet.fieldMappings = [
+    {
+		fromField: "open1",
+		toField: "open1"
+	}, {
+		fromField: "close1",
+		toField: "close1"
+	}, {
+		fromField: "high1",
+		toField: "high1"
+	}, {
+		fromField: "low1",
+		toField: "low1"
+	}, {
+		fromField: "volume1",
+		toField: "volume1"
+	}, {
+		fromField: "oi1",
+		toField: "oi1"
+    },  {
+		fromField: "open2",
+		toField: "open2"
+	}, {
+		fromField: "close2",
+		toField: "close2"
+	}, {
+		fromField: "high2",
+		toField: "high2"
+	}, {
+		fromField: "low2",
+		toField: "low2"
+	}, {
+		fromField: "volume2",
+		toField: "volume2"
+	}, {
+		fromField: "oi2",
+		toField: "oi2"
+    }, {
+        fromField: "spread_value",
+        toField: "spread_value"
+    }];
+	dataSet.color = "#7f8da9";
+	dataSet.dataProvider = info12.Quotes;
+	dataSet.title = '';
+	dataSet.categoryField = "date";
+
+	chart.dataSets = [dataSet];
+
+	// PANELS ///////////////////////////////////////////                                                  
+	var stockPanel0 = new AmCharts.StockPanel();
+	stockPanel0.title = 'Spread ' + info12.info1.Name + ' / ' + info12.info2.Name;
+	stockPanel0.showCategoryAxis = false;
+	stockPanel0.percentHeight = 40;
+	stockPanel0.eraseAll = false;
+	stockPanel0.trendLineColor = "#0000cc";
+
+	var valueAxis = new AmCharts.ValueAxis();
+	valueAxis.dashLength = 5;
+	stockPanel0.addValueAxis(valueAxis);
+
+	stockPanel0.categoryAxis.dashLength = 5;
+
+	// graph of first stock panel
+	var graph = new AmCharts.StockGraph();
+	graph.type = "line";
+	graph.valueField = "spread_value";
+	graph.lineColor = "#4cdb3c";
+	graph.fillColors = "#4cdb3c";
+	graph.negativeLineColor = "#db4c3c";
+	graph.negativeFillColors = "#db4c3c";
+	graph.fillAlphas = 0.05;
+	graph.useDataSetColors = false
+	graph.showBalloon = false;
+	graph.legendValueText = "spread value:[[value]]";
+	stockPanel0.addStockGraph(graph);
+
+	var stockLegend = new AmCharts.StockLegend();
+	stockLegend.valueTextRegular = undefined;
+	stockLegend.markerType = "none";
+	stockLegend.markerSize = 0;
+	stockLegend.valueWidth = 250;
+	stockPanel0.stockLegend = stockLegend;
+	stockPanel0.drawingIconsEnabled = true;
+
+
+	var stockPanel = new AmCharts.StockPanel();
+	stockPanel.title = info12.info1.Name;
+	stockPanel.showCategoryAxis = false;
+	stockPanel.percentHeight = 30;
+	stockPanel.eraseAll = false;
+	stockPanel.trendLineColor = "#0000cc";
+
+	var valueAxis = new AmCharts.ValueAxis();
+	valueAxis.dashLength = 5;
+	stockPanel.addValueAxis(valueAxis);
+
+	stockPanel.categoryAxis.dashLength = 5;
+
+	// graph of first stock panel
+	var graph = new AmCharts.StockGraph();
+	graph.type = "candlestick";
+	graph.openField = "open1";
+	graph.closeField = "close1";
+	graph.highField = "high1";
+	graph.lowField = "low1";
+	graph.valueField = "close1";
+	graph.lineColor = "#4cdb3c";
+	graph.fillColors = "#4cdb3c";
+	graph.negativeLineColor = "#db4c3c";
+	graph.negativeFillColors = "#db4c3c";
+	graph.fillAlphas = 1;
+	graph.useDataSetColors = false
+	graph.showBalloon = false;
+	graph.legendValueText = "O:[[open]] H:[[high]] L:[[low]] C:[[close]]";
+	stockPanel.addStockGraph(graph);
+
+	var stockLegend = new AmCharts.StockLegend();
+	stockLegend.valueTextRegular = undefined;
+	stockLegend.markerType = "none";
+	stockLegend.markerSize = 0;
+	stockLegend.valueWidth = 250;
+	stockPanel.stockLegend = stockLegend;
+	stockPanel.drawingIconsEnabled = true;
+
+
+	/*var stockPanel2 = new AmCharts.StockPanel();
+	stockPanel2.title = "Volume";
+	stockPanel2.percentHeight = 30;
+	stockPanel2.marginTop = 1;
+	//stockPanel2.showCategoryAxis = true;
+
+	var valueAxis2 = new AmCharts.ValueAxis();
+	valueAxis2.dashLength = 5;
+	stockPanel2.addValueAxis(valueAxis2);
+
+	stockPanel2.categoryAxis.dashLength = 5;
+
+	var graph2 = new AmCharts.StockGraph();
+	graph2.valueField = "volume1";
+	graph2.type = "column";
+	graph2.showBalloon = false;
+	graph2.fillAlphas = 1;
+	stockPanel2.addStockGraph(graph2);
+
+	var graph3 = new AmCharts.StockGraph();
+	graph3.title = "open interest";
+	graph3.type = "line";
+	graph3.valueField = "oi1";
+	graph3.showBalloon = false;
+	graph3.lineColor = "#0000db";
+	stockPanel2.addStockGraph(graph3);
+
+	var legend2 = new AmCharts.StockLegend();
+	legend2.markerType = "none";
+	legend2.markerSize = 0;
+	legend2.labelText = "";
+	stockPanel2.stockLegend = legend2;*/
+
+
+	// PANELS 2 ///////////////////////////////////////////                                                  
+	var stockPanel3 = new AmCharts.StockPanel();
+	stockPanel3.title = info12.info2.Name;
+	stockPanel3.showCategoryAxis = false;
+	stockPanel3.percentHeight = 30;
+	stockPanel3.eraseAll = false;
+	stockPanel3.trendLineColor = "#0000cc";
+
+	valueAxis = new AmCharts.ValueAxis();
+	valueAxis.dashLength = 5;
+	stockPanel3.addValueAxis(valueAxis);
+
+	stockPanel3.categoryAxis.dashLength = 5;
+
+	// graph of 2nd stock panel
+	graph = new AmCharts.StockGraph();
+	graph.type = "candlestick";
+	graph.openField = "open2";
+	graph.closeField = "close2";
+	graph.highField = "high2";
+	graph.lowField = "low2";
+	graph.valueField = "close2";
+	graph.lineColor = "#4cdb3c";
+	graph.fillColors = "#4cdb3c";
+	graph.negativeLineColor = "#db4c3c";
+	graph.negativeFillColors = "#db4c3c";
+	graph.fillAlphas = 1;
+	graph.useDataSetColors = false
+	graph.showBalloon = false;
+	graph.legendValueText = "O:[[open]] H:[[high]] L:[[low]] C:[[close]]";
+	stockPanel3.addStockGraph(graph);
+
+	stockLegend = new AmCharts.StockLegend();
+	stockLegend.valueTextRegular = undefined;
+	stockLegend.markerType = "none";
+	stockLegend.markerSize = 0;
+	stockLegend.valueWidth = 250;
+	stockPanel3.stockLegend = stockLegend;
+	stockPanel3.drawingIconsEnabled = true;
+
+	stockPanel3.showCategoryAxis = true;
+
+
+	/*var stockPanel4 = new AmCharts.StockPanel();
+	stockPanel4.title = "Volume";
+	stockPanel4.percentHeight = 30;
+	stockPanel4.marginTop = 1;
+	stockPanel4.showCategoryAxis = true;
+
+	valueAxis2 = new AmCharts.ValueAxis();
+	valueAxis2.dashLength = 5;
+	stockPanel4.addValueAxis(valueAxis2);
+
+	stockPanel4.categoryAxis.dashLength = 5;
+
+	graph2 = new AmCharts.StockGraph();
+	graph2.valueField = "volume2";
+	graph2.type = "column";
+	graph2.showBalloon = false;
+	graph2.fillAlphas = 1;
+	stockPanel4.addStockGraph(graph2);
+
+	graph3 = new AmCharts.StockGraph();
+	graph3.title = "open interest";
+	graph3.type = "line";
+	graph3.valueField = "oi2";
+	graph3.showBalloon = false;
+	graph3.lineColor = "#0000db";
+	stockPanel4.addStockGraph(graph3);
+
+	legend2 = new AmCharts.StockLegend();
+	legend2.markerType = "none";
+	legend2.markerSize = 0;
+	legend2.labelText = "";
+	stockPanel4.stockLegend = legend2;*/
+
+
+	chart.panels = [stockPanel0, stockPanel, stockPanel3];
+//	chart.panels = [stockPanel, stockPanel2, stockPanel3, stockPanel4];
+
+
+	// OTHER SETTINGS ////////////////////////////////////
+	var sbsettings = new AmCharts.ChartScrollbarSettings();
+	sbsettings.graph = graph;
+	sbsettings.graphType = "line";
+	chart.chartScrollbarSettings = sbsettings;
+
+
+	// PERIOD SELECTOR ///////////////////////////////////
+	var periodSelector = new AmCharts.PeriodSelector();
+	periodSelector.position = "bottom";
+	periodSelector.periods = [{
+		period: "DD",
+		count: 10,
+		label: "10 days"
+	}, {
+		period: "MM",
+		count: 1,
+		label: "1 month"
+	}, {
+		period: "YYYY",
+		count: 1,
+		label: "1 year"
+	}, {
+		period: "YTD",
+		label: "YTD"
+	}, {
+		period: "MAX",
+		selected: true,
+		label: "MAX"
+	}];
+	chart.periodSelector = periodSelector;
+
+	chart.categoryAxesSettings.groupToPeriods = ["DD"];
+
+	chart.contract_infos = info12;
+    chart.addListener("zoomed", ChartZoomed);
+
+    chart.write('chartdiv' + info12.nav_idx);
+
+	return chart;
+}
+
+function createHstgrmChart(name, chart_div_id, chartData) {
+
+    // SERIAL CHART
+    chart = new AmCharts.AmSerialChart();
+    chart.dataProvider = chartData;
+    chart.categoryField = "interval";
+    chart.startDuration = 1;
+
+    // AXES
+    // category
+    var categoryAxis = chart.categoryAxis;
+    categoryAxis.labelRotation = 45;
+    categoryAxis.gridPosition = "start";
+    categoryAxis.gridCount = 3;
+    categoryAxis.autoGridCount = false;
+
+    // value
+    // in case you don't want to change default settings of value axis,
+    // you don't need to create it, as one value axis is created automatically.
+    // GRAPH
+    var graph = new AmCharts.AmGraph();
+    graph.valueField = "freq";
+    graph.balloonText = "interval: [[category]], freq: [[value]]";
+    graph.type = "column";
+    graph.lineAlpha = 1;
+    graph.fillAlphas = 0.3;
+    chart.addGraph(graph);
+
+    // Let's add a guide
+    var guide1 = new AmCharts.Guide();
+    guide1.category = chartData[chartData.length / 2 - 1].interval;
+    guide1.toCategory = chartData[chartData.length / 2].interval;
+    guide1.lineColor = "#0000CC";
+    guide1.fillColor = "#0000CC";
+    guide1.lineAlpha = 0.1;
+    guide1.fillAlpha = 0.03;
+    guide1.inside = false;
+    guide1.labelRotation = 90;
+    guide1.label = "";
+    chart.categoryAxis.addGuide(guide1);
+
+    chart.write(chart_div_id);
+
+    return chart;
+}
+
+function ChartZoomed(param) { // при установке на максимум - необходимо чтобы все графики ставились на максимум
+
+    var chart = param.chart;
+    var info12 = chart.contract_infos;
+
+    info12.curStartDate = param.startDate;
+    info12.curEndDate = param.endDate;
+
+    if (zooming_all_charts == true)
+        return;
+
+    zooming_all_charts = true;
+
+    var cnt_y = info12.info1.ContractYear;
+
+    for (var i = 0; i < years_num; i++) {
+        var cur_info12 = infos12[i];
+        if (cur_info12.chart != undefined && cur_info12.chart != chart) {
+            var cur_cnt_y = cur_info12.info1.ContractYear;
+            var dyear = cur_cnt_y - cnt_y;
+            
+            var startDate = new Date(param.startDate);
+            startDate.setFullYear(startDate.getFullYear() + dyear);
+            var endDate = new Date(param.endDate);
+            endDate.setFullYear(endDate.getFullYear() + dyear);
+
+            cur_info12.chart.zoom(startDate, endDate);
+        }
+    }
+
+    CalculateHistograms();
+
+    for (var i = 0; i < years_num; i++) {
+        var cur_info12 = infos12[i];
+        if (cur_info12.hstgrm_chart != undefined) {
+            cur_info12.hstgrm_chart.dataProvider = cur_info12.hstgrm;
+            cur_info12.hstgrm_chart.validateData();     
+        }
+    }
+    if (summary_info.hstgrm_chart != undefined) {
+        summary_info.hstgrm_chart.dataProvider = summary_info.hstgrm;
+        summary_info.hstgrm_chart.validateData();
+    }
+
+    zooming_all_charts = false;
+}
+
+</script>
+
+</body>
+</html>
